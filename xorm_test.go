@@ -44,10 +44,12 @@ func createEngine(dbType, connStr string) error {
 			// create databases if not exist
 			var db *sql.DB
 			var err error
-			if strings.ToLower(dbType) != core.MSSQL {
-				db, err = sql.Open(dbType, connStr)
-			} else {
+			if strings.ToLower(dbType) == core.MSSQL {
 				db, err = sql.Open(dbType, strings.Replace(connStr, "xorm_test", "master", -1))
+			} else if strings.ToLower(dbType) == core.POSTGRES {
+				db, err = sql.Open(dbType, strings.Replace(connStr, "xorm_test", "postgres", -1))
+			} else {
+				db, err = sql.Open(dbType, connStr)
 			}
 
 			if err != nil {
@@ -60,7 +62,7 @@ func createEngine(dbType, connStr string) error {
 					return fmt.Errorf("db.Exec: %v", err)
 				}
 			case core.POSTGRES:
-				rows, err := db.Query(fmt.Sprintf("SELECT 1 FROM pg_database WHERE datname = 'xorm_test'"))
+				rows, err := db.Query("SELECT 1 FROM pg_database WHERE datname = 'xorm_test'")
 				if err != nil {
 					return fmt.Errorf("db.Query: %v", err)
 				}
